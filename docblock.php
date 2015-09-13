@@ -1,32 +1,5 @@
+#!/usr/bin/env php
 <?php
-/**
- * DocBlockGenerator
- *
- * This class will generate docblock outline for files/folders.
- *
- * Use from command line - params:
- * file/folder - the file or folder you want to docblock (php files)
- * -r - to have it recursively go through a folder
- * target function - to docblock only a specific method/function name
- *
- * Example:
- * php docblock.php target.php targetFunction
- * or
- * php docblock.php target/dir -r targetFunction
- *
- * Credit to Sean Coates for the getProtos function, modified a little.
- * http://seancoates.com/fun-with-the-tokenizer
- *
- * TODOs :
- * 1. add all proper docblock properties
- * 2. better checking for if docblock already exists
- * 3. docblocking for class properties
- * 4. try to gather more data for automatic insertion such as for @access
- *
- * @author    Anthony Gentile
- * @version   0.85
- * @link      http://agentile.com/docblock/
- */
 class DocBlockGenerator {
 
     public $exts = array('.php', '.php4', '.php5', '.phps', '.inc');
@@ -36,19 +9,14 @@ class DocBlockGenerator {
     public $file_contents;
     public $log = array();
 
-
     /**
-     * __construct
+     * Insert description here
      *
-     * @param $target
-     * @param $target_function
-     * @param $recursive
+     * @param mixed $target
+     * @param mixed $target_function
+     * @param mixed $recursive
      *
      * @return void
-     *
-     * @access public
-     * @static
-     * @since 0.85
      */
     public function __construct($target, $target_function = null, $recursive = false)
     {
@@ -58,15 +26,10 @@ class DocBlockGenerator {
     }
 
     /**
-     * result
      * Print output to command line
      *
      *
      * @return string
-     *
-     * @access public
-     * @static
-     * @since  0.85
      */
     public function result()
     {
@@ -78,14 +41,10 @@ class DocBlockGenerator {
     }
 
     /**
-     * start
      * Begin the docblocking process, determine if a file or folder was given
      *
-     * @return void
      *
-     * @access public
-     * @static
-     * @since  0.85
+     * @return void
      */
     public function start()
     {
@@ -112,16 +71,11 @@ class DocBlockGenerator {
     }
 
     /**
-     * fileCheck
      * Make sure we can deal with the target file
      *
-     * @param $target
+     * @param mixed $target
      *
      * @return bool
-     *
-     * @access public
-     * @static
-     * @since  0.85
      */
     public function fileCheck($target)
     {
@@ -143,14 +97,10 @@ class DocBlockGenerator {
     }
 
     /**
-     * fileDocBlock
      * Shell method for docblock operations, explodes file, performs docblock methods, impodes.
      *
-     * @return void
      *
-     * @access public
-     * @static
-     * @since  0.85
+     * @return void
      */
     public function fileDocBlock()
     {
@@ -180,14 +130,10 @@ class DocBlockGenerator {
     }
 
     /**
-     * getProtos
      * This function goes through the tokens to gather the arrays of information we need
      *
-     * @return array
      *
-     * @access public
-     * @static
-     * @since  0.85
+     * @return array
      */
     public function getProtos()
     {
@@ -212,6 +158,7 @@ class DocBlockGenerator {
             } elseif (is_array($tokens[$i]) && $tokens[$i][0] == T_FUNCTION) {
                 $next_by_ref = FALSE;
                 $this_func = array();
+                $last_str = 'mixed';
 
                 while ($tokens[++$i] != ')') {
                     if (is_array($tokens[$i]) && $tokens[$i][0] != T_WHITESPACE) {
@@ -222,10 +169,20 @@ class DocBlockGenerator {
                                 'line' => $tokens[$i][2],
                             );
                         } else {
+                            if ($tokens[$i][0] == T_STRING) {
+                                $last_str = $tokens[$i][1];
+                                continue;
+                            }
+
+                            if ($tokens[$i][0] !== T_VARIABLE) {
+                                continue;
+                            }
+
                             $this_func['params'][] = array(
                                 'byRef' => $next_by_ref,
-                                'name' => $tokens[$i][1],
+                                'name' => $last_str . ' ' . $tokens[$i][1],
                             );
+                            $last_str = 'mixed';
                             $next_by_ref = FALSE;
                         }
                     } elseif ($tokens[$i] == '&') {
@@ -255,20 +212,15 @@ class DocBlockGenerator {
     }
 
     /**
-     * docBlock
      * Main docblock function, determines if class or function docblocking is need and calls
      * appropriate subfunction.
      *
-     * @param $arr
-     * @param $funcs
-     * @param $classes
-     * @param $target_function
+     * @param mixed $arr
+     * @param mixed $funcs
+     * @param mixed $classes
+     * @param mixed $target_function
      *
      * @return array
-     *
-     * @access public
-     * @static
-     * @since  0.85
      */
     public function docBlock($arr, $funcs, $classes, $target_function)
     {
@@ -320,18 +272,13 @@ class DocBlockGenerator {
     }
 
     /**
-     * scanDirectories
      * Get all specific files from a directory and if recursive, subdirectories
      *
-     * @param $dir
-     * @param $recursive
-     * @param $data
+     * @param mixed $dir
+     * @param mixed $recursive
+     * @param mixed $data
      *
      * @return array
-     *
-     * @access public
-     * @static
-     * @since  0.85
      */
     public function scanDirectories($dir, $recursive = false, $data = array())
     {
@@ -365,17 +312,12 @@ class DocBlockGenerator {
     }
 
     /**
-     * getData
      * Retrieve method or class information from our arrays
      *
-     * @param $line
-     * @param $arr
+     * @param mixed $line
+     * @param mixed $arr
      *
      * @return mixed
-     *
-     * @access public
-     * @static
-     * @since  0.85
      */
     public function getData($line, $arr)
     {
@@ -388,16 +330,11 @@ class DocBlockGenerator {
     }
 
     /**
-     * docBlockExists
      * Primitive check to see if docblock already exists
      *
-     * @param $line
+     * @param mixed $line
      *
      * @return bool
-     *
-     * @access public
-     * @static
-     * @since  0.85
      */
     public function docBlockExists($line)
     {
@@ -425,22 +362,16 @@ class DocBlockGenerator {
     }
 
     /**
-     * functionDocBlock
      * Docblock for function
      *
-     * @param $indent
-     * @param $data
+     * @param mixed $indent
+     * @param mixed $data
      *
      * @return string
-     *
-     * @access public
-     * @static
-     * @since  0.85
      */
     public function functionDocBlock($indent, $data)
     {
         $doc_block = "{$indent}/**\n";
-        $doc_block .= "{$indent} * {$data['name']}\n";
         $doc_block .= "{$indent} * Insert description here\n";
         $doc_block .= "{$indent} *\n";
         if (isset($data['params'])) {
@@ -450,61 +381,33 @@ class DocBlockGenerator {
         }
         $doc_block .= "{$indent} *\n";
         $doc_block .= "{$indent} * @return\n";
-        $doc_block .= "{$indent} *\n";
-        $doc_block .= "{$indent} * @access\n";
-        $doc_block .= "{$indent} * @static\n";
-        $doc_block .= "{$indent} * @see\n";
-        $doc_block .= "{$indent} * @since\n";
         $doc_block .= "{$indent} */\n";
 
         return $doc_block;
     }
 
     /**
-     * classDocBlock
      * Docblock for class
      *
-     * @param $indent
-     * @param $data
+     * @param mixed $indent
+     * @param mixed $data
      *
      * @return string
-     *
-     * @access public
-     * @static
-     * @since  0.85
      */
     public function classDocBlock($indent, $data)
     {
-        $doc_block = "{$indent}/**\n";
-        $doc_block .= "{$indent} * {$data['name']}\n";
-        $doc_block .= "{$indent} * Insert description here\n";
-        $doc_block .= "{$indent} *\n";
-        $doc_block .= "{$indent} * @category\n";
-        $doc_block .= "{$indent} * @package\n";
-        $doc_block .= "{$indent} * @author\n";
-        $doc_block .= "{$indent} * @copyright\n";
-        $doc_block .= "{$indent} * @license\n";
-        $doc_block .= "{$indent} * @version\n";
-        $doc_block .= "{$indent} * @link\n";
-        $doc_block .= "{$indent} * @see\n";
-        $doc_block .= "{$indent} * @since\n";
-        $doc_block .= "{$indent} */\n";
+        $doc_block = "";
 
         return $doc_block;
     }
 
     /**
-     * getStrIndent
      * Returns indentation count of a string
      *
-     * @param $str
-     * @param $count
+     * @param mixed $str
+     * @param mixed $count
      *
      * @return int
-     *
-     * @access public
-     * @static
-     * @since  0.85
      */
     public function getStrIndent($str, $count = 0)
     {
@@ -557,3 +460,4 @@ if (isset($argv[1])) {
 } else {
     die("\nPlease provide a file or directory as a parameter\n");
 }
+
